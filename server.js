@@ -10,10 +10,19 @@ app.use(express.json());
 
 app.get("/", (req, res) => res.send("Pharmacy backend is running ✅"));
 
+// API routes
 app.use("/api/products", require("./routes/products.routes"));
 app.use("/api/api/products", require("./routes/products.routes"));
 app.use("/api/cart", require("./routes/cart.routes"));
 app.use("/api/orders", require("./routes/orders.routes"));
+
+// ✅ Admin routes mapping (for Flutter Customers page)
+const ordersRoutes = require("./routes/orders.routes");
+
+// Map admin endpoints
+app.get("/api/admin/orders", (req, res) => ordersRoutes.handle(req, res));
+app.post("/api/admin/orders/:id/status", (req, res) => ordersRoutes.handle(req, res));
+app.post("/api/admin/orders/:id/delete", (req, res) => ordersRoutes.handle(req, res));
 
 const PORT = process.env.PORT || 5000;
 
@@ -22,7 +31,7 @@ const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });
 
-// ✅ avoid crash spam if port is used
+// ✅ Avoid crash spam if port is used
 server.on("error", (err) => {
   if (err.code === "EADDRINUSE") {
     console.log(`❌ Port ${PORT} already in use. Close the other server or change PORT`);
@@ -30,4 +39,3 @@ server.on("error", (err) => {
   }
   throw err;
 });
-

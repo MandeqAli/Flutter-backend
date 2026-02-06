@@ -11,6 +11,7 @@ app.use(express.json());
 app.get("/", (req, res) => res.send("Pharmacy backend is running ✅"));
 
 app.use("/api/products", require("./routes/products.routes"));
+app.use("/api/api/products", require("./routes/products.routes"));
 app.use("/api/cart", require("./routes/cart.routes"));
 app.use("/api/orders", require("./routes/orders.routes"));
 
@@ -29,3 +30,4 @@ server.on("error", (err) => {
   }
   throw err;
 });
+

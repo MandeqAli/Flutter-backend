@@ -1,67 +1,36 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
 
-// Controllers
-import 'controllers/cart_controller.dart';
-import 'controllers/auth_controller.dart';
-import 'controllers/theme_controller.dart';
-import 'controllers/categories_controller.dart';
+dotenv.config();
 
-// Screens
-import 'screens/login.dart';
-import 'screens/signup.dart';
-import 'screens/splash.dart';
-import 'screens/medicne.dart';
-import 'screens/vitamine.dart';
-import 'screens/home.dart';
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-// Pages
-import 'pages/dashboard_page.dart';
-import 'pages/customers_page.dart';
-import 'pages/categories_page.dart';
-import 'pages/order_details_page.dart';
-import 'pages/confirmed_orders_page.dart';
+app.get("/", (req, res) => res.send("Pharmacy backend is running ✅"));
 
-void main() {
-  // Initialize controllers globally
-  Get.put(CartController(), permanent: true);
-  Get.put(AuthController(), permanent: true);
-  Get.put(ThemeController(), permanent: true);
-  Get.put(CategoriesController(), permanent: true);
+// main routes
+app.use("/api/products", require("./routes/products.routes"));
+app.use("/api/cart", require("./routes/cart.routes"));
+app.use("/api/orders", require("./routes/orders.routes"));
 
-  runApp(const MyApp());
-}
+// ✅ ALIAS routes to match your Flutter calls (/api + "/api/...")
+app.use("/api/api/products", require("./routes/products.routes"));
+app.use("/api/api/cart", require("./routes/cart.routes"));
+app.use("/api/api/orders", require("./routes/orders.routes"));
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
+const PORT = process.env.PORT || 5000;
 
-      // Theme settings
-      theme: ThemeData.light(useMaterial3: true),
-      darkTheme: ThemeData.dark(useMaterial3: true),
-      themeMode: ThemeMode.light, // Can be changed dynamically later
+const server = app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+});
 
-      // Initial screen
-      home: const SplashPage(),
-
-      // Named routes
-      getPages: [
-        GetPage(name: '/splash', page: () => const SplashPage()),
-        GetPage(name: '/login', page: () => const LoginPage()),
-        GetPage(name: '/signup', page: () => const SignupPage()),
-        GetPage(name: '/home', page: () => HomePage()),
-        GetPage(name: '/medicne', page: () => const OnboardingOne()),
-        GetPage(name: '/vitamine', page: () => const OnboardingTwo()),
-        GetPage(name: '/dashboard', page: () => DashboardPage()),
-        GetPage(name: '/customers', page: () => CustomersPage()),
-        GetPage(name: '/categories', page: () => CategoriesPage()),
-        GetPage(name: '/order_details', page: () => const OrderDetailsPage()),
-        GetPage(name: '/confirmed_orders', page: () => ConfirmedOrdersPage()),
-      ],
-    );
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.log(`❌ Port ${PORT} already in use. Close the other server or change PORT`);
+    process.exit(1);
   }
-}
+  throw err;
+});
